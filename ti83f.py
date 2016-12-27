@@ -23,14 +23,14 @@ class AppVar:
 		self._data = b''
 
 	def __bytes__(self):
-		return self._TI83F_SIGNATURE + self._comment + int2b16(len(self._data)) + self._data + self.checksum()
+		return self._TI83F_SIGNATURE + self._comment + int2b16(len(self._data)) + self._data + int2b16(self.checksum())
 
 	def add(self, var):
 		self._data += bytes(var)
 
 	def checksum(self):
 		# Lower 16 bits of sum of all bytes in data segment
-		return int2b16(sum(self._data))
+		return sum(self._data) % (2**16)
 
 class Var:
 	_VAR_START = b'\x0D\x00'
