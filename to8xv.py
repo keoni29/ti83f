@@ -2,14 +2,20 @@
 """	to8xv: Convert any file to appVar
 	(Python version) """
 
-# TODO use commandline params
-import warnings
+import argparse
+import os
 import ti83f
 
-fname_src = "HCMT.tmp"
-# TODO base output filename on input filename if no
-# output name is specified!
-fname_dst = "HCMT.8xv"
+parser = argparse.ArgumentParser()
+parser.add_argument("filename", type=str)
+parser.add_argument("-o", "--output", type=str)
+args = parser.parse_args()
+
+fname_src = args.filename
+if args.output:
+	fname_dst = args.output
+else:
+	fname_dst = os.path.splitext(fname_src)[0] + '.8xv'
 
 appv = ti83f.AppVar()
 var = ti83f.Var(b'HCMT', archived=True)
