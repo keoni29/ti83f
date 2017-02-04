@@ -1,14 +1,36 @@
+"""This module contains some classes for creating TI83F AppVars.
+
+An object of type Var contains your data. You can give it a name and specify if it is archived or not.
+You can add multiple Var objects to the AppVar using the add() method. When you are done convert the AppVar object to bytes and save it to a file.
+
+Example:
+	>>> appv = AppVar()
+	>>> var = Var(b'SPAMVAR', archived=False)
+	>>> var.data = b'Nobody expects the spanish inquisition!'
+	>>> appv.add(var)
+	>>> bytes(appv)
+
+Todo:
+	* Test storing multiple variables in a single AppVar.
+	* Add support for different types of variables.
+	* Put some more info in docstrings.
+
+	https://github.com/keoni29/to8xv
+
+"""
+
 import struct
 
-# Convert int type to a bytearray of two bytes. Little endian
-def int2b16(val):
+def _int2b16(val):
+	"""Convert int type to a bytearray of two bytes. Little endian"""
 	return struct.pack('<H',val % (2**16))
 
-# Convert int type to a bytearray of one byte.
-def int2b8(val):
+def _int2b8(val):
+	"""Convert int type to a bytearray of one byte."""
 	return struct.pack('B',val % (2**8))
 
-def bytes_pad(b, size):
+def _bytes_pad(b, size):
+	"""Pad string of bytes to size or truncate if string is too long"""
 	if len(b) > size:
 		# Truncating oversized bytearray
 		return b[0:(size-1)]
@@ -19,6 +41,7 @@ class AppVar:
 	_TI83F_SIGNATURE = b'\x2A\x2A\x54\x49\x38\x33\x46\x2A\x1A\x0A\x00'
 
 	def __init__(self, comment = b'AppVariable file'):
+		"""Create a new AppVar. Add Variable entries using the add() method."""
 		self._comment = bytes_pad(comment, 42)
 		self._data = b''
 
@@ -26,10 +49,11 @@ class AppVar:
 		return self._TI83F_SIGNATURE + self._comment + int2b16(len(self._data)) + self._data + int2b16(self.checksum())
 
 	def add(self, var):
+		"""Add a Variable entry to the AppVar"""
 		self._data += bytes(var)
 
 	def checksum(self):
-		# Lower 16 bits of sum of all bytes in data segment
+		"""Returns the TI83F checksum"""
 		return sum(self._data) % (2**16)
 
 class Var:
@@ -38,6 +62,7 @@ class Var:
 	_VAR_VERSION = b'\x00'
 
 	def __init__(self, name, data=b'', archived=False):
+		"""Create a Variable entry. Data can be passed trough the constructor or trough the data attribute."""
 		self._name = bytes_pad(name, 8)
 		self.data = data
 
