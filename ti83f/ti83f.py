@@ -1,14 +1,20 @@
 import struct
 
-def int2b16(val):
+def int2w(val):
     """ Convert integer to 16-bit word.
     :type val: int
     :return: Two bytes, little endian (least significant byte first.)
     :rtype: bytes"""
     return struct.pack('<H',val % (2**16))
 
+def w2int(val):
+    """ Convert 16-bit word to integer.
+    :param val: Two bytes, little endian (least significant byte first.)
+    :type val: bytes
+    :rtype: int """
+    return struct.unpack('<H', raw[:2])
 
-def int2b8(val):
+def int2b(val):
     """ Convert integer to single byte. 
     :type val: int
     :return: One byte
@@ -33,15 +39,34 @@ def bytes_pad(array, length):
 
 class AppVar:
     _TI83F_SIGNATURE = b'\x2A\x2A\x54\x49\x38\x33\x46\x2A\x1A\x0A\x00'
+    _COMMENT_LENGTH = 42
 
-    def __init__(self, comment = b'AppVariable file'):
-        self._comment = bytes_pad(comment, 42)
+    def __init__(self, comment = b'AppVariable file', raw = None):
+        self._comment = bytes_pad(comment, _COMMENT_LENGTH)
         self._data = b''
+
+        if raw is not None:
+            self.from_raw(raw)
 
 
     def __bytes__(self):
-        return self._TI83F_SIGNATURE + self._comment + int2b16(len(self._data)) + self._data + int2b16(self.checksum())
+        return self._TI83F_SIGNATURE + self._comment + int2w(len(self._data)) + self._data + int2w(self.checksum())
 
+    def from_raw(self, raw):
+        if raw[:len(_TI83F_SIGNATURE)] != _TI83F_SIGNATURE:
+            raise ValueError("Wrong TI83F signature")
+        raw = raw[len(_TI83F_SIGNATURE):]
+
+        self._comment = raw[:_COMMENT_LENGTH]
+        raw = raw[_COMMENT_LENGTH:]
+        data_length = w2int(raw[:2])
+        raw = raw[2:]
+        self._data = raw[:-2]
+        raw = raw[data_length:]
+        checksum = w2int(raw)
+        calculated = self.checksum()
+        if checksum != calculated:
+            raise ValueError("Wrong checksum. Expected " + str(calculated) + ", Got " + str(checksum) )
 
     def add(self, variable):
         """ Add a new variable to the appVar.
@@ -82,8 +107,8 @@ class Variable:
         dataSize = len(self.data)
         varSize = dataSize + 2        # 2 bytes for variable header
 
-        header = self._VAR_START + int2b16(varSize) + self._VAR_TYPEID + \
-            self._name + self._VAR_VERSION    + self._flag + int2b16(varSize) \
-            + int2b16(dataSize)
+        header = self._VAR_START + int2w(varSize) + self._VAR_TYPEID + \
+            self._name + self._VAR_VERSION    + self._flag + int2w(varSize) \
+            + int2w(dataSize)
 
         return header + self.data
