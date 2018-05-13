@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='ti83f',
-      version='0.2',
+      version='0.2.1',
       description='Encode and decode TI83F files',
       url='',
       author='Koen van Vliet',

@@ -116,7 +116,7 @@ class Variable:
     def __init__(self, name = None, type_id=None, data=b'', archived=False):
         """ Create a new variable.
         :param name: Name of max 8 characters. Longer names will be truncated without warning.
-        :param type_id: Type of variable e.g. Variable.TYPE_ID_PROGRAM
+        :param type_id: Type of variable. Default: Variable.TYPE_ID_APPVAR
         :param data: Variable data field contents
         :param archived: Set true if variable should be archived.
         :type name: bytes
@@ -300,3 +300,14 @@ def appvar_from_bytes(raw):
         raise ValueError("Wrong checksum. Expected " + str(calculated) + ", Got " + str(checksum) )
     
     return appv
+
+
+def variables_from_file(filename):
+    """ Get variables from an appvar file """
+    with open(filename, 'rb') as fd:
+        raw = fd.read()
+
+    appv = appvar_from_bytes(raw)
+    variables = variables_from_bytes(appv.get_data())
+
+    return variables
