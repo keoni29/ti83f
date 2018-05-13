@@ -12,10 +12,10 @@ def main():
 
     parser.add_argument('filename', help="Input file name")
     parser.add_argument('varname', help="Name of the variable")
-    parser.add_argument('-r', '--ram', 
+    parser.add_argument('-a', '--archived', 
                         dest='archived',
-                        action='store_false', 
-                        help="Place variable in RAM instead of Archive")
+                        action='store_true', 
+                        help="Archive variable")
 
     parser.add_argument('-o', dest='output', help="Output file name")
     #TODO add variable type_id option
@@ -33,7 +33,7 @@ def main():
         data = src.read()
     
     variable = ti83f.Variable(varname, 
-                              data=data
+                              data=data,
                               archived=args.archived)
     appv = ti83f.AppVar()
     appv.add(variable)

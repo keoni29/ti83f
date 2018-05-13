@@ -9,10 +9,28 @@ pip install .
 ```
 You may need to run pip as super user or with sudo.
 
-## Basic usage
+## Using with the utility script
+Convert any file to TI83F application variable file using the included utility script: **to8xv**.
+```
+$ to8xv -h
+usage: to8xv [-h] [-a] [-o OUTPUT] filename varname
+
+Convert any file to TI83F application variable file
+
+positional arguments:
+  filename        Input file name
+  varname         Name of the variable
+
+optional arguments:
+  -h, --help      show this help message and exit
+  -a, --archived  Archive variable
+  -o OUTPUT       Output file name
+```
+
+## Using as a module
 Here are some examples to get you started.
 
-### Construct appvar
+### Constructing a TI83F file
 Using the **ti83f** module you can construct a TI83F file like this
 ```
 import ti83f
@@ -38,8 +56,8 @@ Hexdump of SPAM.8xv
 0000050   W   o   r   l   d   ! 026 006  
 0000058
 
-### Deconstruct appvar
-You can also deconstruct a TI83F file and extract the variable names and data from it like this
+### Deconstructing a TI83F file
+You can also deconstruct a TI83F file and extract the variable types, names and data from it like this
 ```
 import ti83f
 
