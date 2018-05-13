@@ -90,4 +90,7 @@ ENV/
 
 # Project specific
 *.8xv
-*.tmp
+*.8xp
+
+# Dolphin file explorer
+.directory

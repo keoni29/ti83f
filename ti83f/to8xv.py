@@ -4,13 +4,25 @@
 def main():
     import argparse
     import os
-    import to8xv.ti83f
+    import ti83f
+    import sys
 
     parser = argparse.ArgumentParser(description="Convert any file to appVar")
     parser.add_argument('filename', help="Input file name")
     parser.add_argument('varname', help="Name of the variable")
-    parser.add_argument('-o', help="Output file name")
+    parser.add_argument('-r', '--ram', 
+                        dest='archived',
+                        action='store_false', 
+                        help="Place variable in RAM instead of Archive")
+
+    parser.add_argument('-o', dest='output', help="Output file name")
     args = parser.parse_args()
+
+    # Check user input
+    if not args.varname.isalpha() or not args.varname.isupper(): #TODO also allow digits
+        print("Variable names can only contain uppercase letters.", 
+              file=sys.stderr)
+        sys.exit()
 
     fname_src = args.filename
     if args.output:
@@ -18,8 +30,10 @@ def main():
     else:
         fname_dst = os.path.splitext(fname_src)[0] + '.8xv'
 
-    appv = to8xv.ti83f.AppVar()
-    variable = to8xv.ti83f.Variable(bytes(args.varname, 'ascii'), archived=True)
+    appv = ti83f.AppVar()
+    varname = bytes(args.varname, 'ascii')
+    variable = ti83f.Variable(varname, 
+                                    archived=args.archived)
 
     with open(fname_src, 'rb') as src:
         with open(fname_dst, 'wb') as dst:
