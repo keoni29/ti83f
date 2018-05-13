@@ -1,1 +1,1 @@
-from .ti83f import AppVar,Var
+from .ti83f import AppVar,Variable

@@ -6,9 +6,10 @@ def main():
     import os
     import to8xv.ti83f
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("filename", type=str)
-    parser.add_argument("-o", "--output", type=str)
+    parser = argparse.ArgumentParser(description="Convert any file to appVar")
+    parser.add_argument('filename', help="Input file name")
+    parser.add_argument('varname', help="Name of the variable")
+    parser.add_argument('-o', help="Output file name")
     args = parser.parse_args()
 
     fname_src = args.filename
@@ -18,7 +19,7 @@ def main():
         fname_dst = os.path.splitext(fname_src)[0] + '.8xv'
 
     appv = to8xv.ti83f.AppVar()
-    variable = to8xv.ti83f.Variable(b'HCMT', archived=True)
+    variable = to8xv.ti83f.Variable(bytes(args.varname, 'ascii'), archived=True)
 
     with open(fname_src, 'rb') as src:
         with open(fname_dst, 'wb') as dst:
@@ -27,6 +28,6 @@ def main():
 
             dst.write(bytes(appv))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
     

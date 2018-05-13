@@ -12,7 +12,7 @@ def w2int(val):
     :param val: Two bytes, little endian (least significant byte first.)
     :type val: bytes
     :rtype: int """
-    return struct.unpack('<H', raw[:2])
+    return struct.unpack('<H', val)[0]
 
 def int2b(val):
     """ Convert integer to single byte. 
@@ -29,12 +29,12 @@ def bytes_pad(array, length):
     :type array: bytes
     :type length: int
     :rtype: bytes """
-    if len(b) > length:
+    if len(array) > length:
         # Truncate
         return array[0:(length-1)]
     else:
         # Pad
-        return array + bytes(length - len(b))
+        return array + bytes(length - len(array))
 
 
 class AppVar:
@@ -42,7 +42,7 @@ class AppVar:
     _COMMENT_LENGTH = 42
 
     def __init__(self, comment = b'AppVariable file', raw = None):
-        self._comment = bytes_pad(comment, _COMMENT_LENGTH)
+        self._comment = bytes_pad(comment, self._COMMENT_LENGTH)
         self._data = b''
 
         if raw is not None:
@@ -53,12 +53,12 @@ class AppVar:
         return self._TI83F_SIGNATURE + self._comment + int2w(len(self._data)) + self._data + int2w(self.checksum())
 
     def from_raw(self, raw):
-        if raw[:len(_TI83F_SIGNATURE)] != _TI83F_SIGNATURE:
+        if raw[:len(self._TI83F_SIGNATURE)] != self._TI83F_SIGNATURE:
             raise ValueError("Wrong TI83F signature")
-        raw = raw[len(_TI83F_SIGNATURE):]
+        raw = raw[len(self._TI83F_SIGNATURE):]
 
-        self._comment = raw[:_COMMENT_LENGTH]
-        raw = raw[_COMMENT_LENGTH:]
+        self._comment = raw[:self._COMMENT_LENGTH]
+        raw = raw[self._COMMENT_LENGTH:]
         data_length = w2int(raw[:2])
         raw = raw[2:]
         self._data = raw[:-2]
@@ -91,7 +91,7 @@ class Variable:
     def __init__(self, name, data=b'', archived=False):
         """ Create a new variable.
         :param name: Name of max 8 characters. Longer names will be truncated without warning.
-        :type name: str
+        :type name: bytes
         :type data: bytes
         """
         self._name = bytes_pad(name, 8)
