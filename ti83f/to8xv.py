@@ -1,5 +1,4 @@
-""" to8xv: Convert any file to appVar
-    (Python version) """
+""" Convert any file to TI83F application variable file """
 
 def main():
     import argparse
@@ -7,7 +6,10 @@ def main():
     import ti83f
     import sys
 
-    parser = argparse.ArgumentParser(description="Convert any file to appVar")
+    parser = argparse.ArgumentParser(description=
+                                     "Convert any file to TI83F application \
+                                     variable file")
+
     parser.add_argument('filename', help="Input file name")
     parser.add_argument('varname', help="Name of the variable")
     parser.add_argument('-r', '--ram', 
@@ -17,12 +19,6 @@ def main():
 
     parser.add_argument('-o', dest='output', help="Output file name")
     args = parser.parse_args()
-
-    # Check user input
-    if not args.varname.isalpha() or not args.varname.isupper(): #TODO also allow digits
-        print("Variable names can only contain uppercase letters.", 
-              file=sys.stderr)
-        sys.exit()
 
     fname_src = args.filename
     if args.output:
@@ -39,7 +35,6 @@ def main():
         with open(fname_dst, 'wb') as dst:
             variable.data = src.read()
             appv.add(variable)
-
             dst.write(bytes(appv))
 
 if __name__ == '__main__':

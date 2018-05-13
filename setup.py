@@ -1,8 +1,8 @@
 from setuptools import setup
 
 setup(name='ti83f',
-      version='0.1',
-      description='Convert any file to ti8x appVar',
+      version='0.2',
+      description='Encode and decode TI83F files',
       url='',
       author='Koen van Vliet',
       author_email='8by8mail@gmail.com',

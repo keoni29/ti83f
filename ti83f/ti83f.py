@@ -1,5 +1,24 @@
+""" Library for encoding and decoding TI83F files
+usage:
+    1) Decode TI83F files
+        a) Decode appvar from bytes
+        b) Get appvar data
+        c) Decode variables from bytes
+    2) Encode TI83F files
+        a) Create appvar
+        b) Add variables
+        c) Convert appvar to bytes """
+
 import struct
 import warnings
+
+def trim_zeroes(bytestring):
+    for i, b in enumerate(bytestring):
+        if not b:
+            return bytestring[:i]
+
+    return bytestring
+
 
 def int2w(val):
     """ Convert integer to 16-bit word.
@@ -8,6 +27,7 @@ def int2w(val):
     :rtype: bytes"""
     return struct.pack('<H',val % (2**16))
 
+
 def w2int(val):
     """ Convert 16-bit word to integer.
     :param val: Two bytes, little endian (least significant byte first.)
@@ -15,12 +35,14 @@ def w2int(val):
     :rtype: int """
     return struct.unpack('<H', val)[0]
 
+
 def b2int(val):
     """ Convert byte to integer.
     :param val: One byte
     :type val: bytes
     :rtype: int """
     return struct.unpack('B', val)[0]
+
 
 def int2b(val):
     """ Convert integer to single byte. 
@@ -30,19 +52,19 @@ def int2b(val):
     return struct.pack('B',val % (2**8))
 
 
-def bytes_pad(array, length):
+def bytes_pad(b, length):
     """ Pad or truncate bytes object to length
-    :param array: The bytes to pad
+    :param b: The bytes to pad
     :param length: The length of the new bytes. Function will truncate the bytes if needed.
-    :type array: bytes
+    :type b: bytes
     :type length: int
     :rtype: bytes """
-    if len(array) > length:
+    if len(b) > length:
         # Truncate
-        return array[0:(length-1)]
+        return b[0:(length-1)]
     else:
         # Pad
-        return array + bytes(length - len(array))
+        return b + bytes(length - len(b))
 
 
 class AppVar:
@@ -57,6 +79,11 @@ class AppVar:
     def __bytes__(self):
         return self._TI83F_SIGNATURE + self._comment + int2w(len(self.data)) + self.data + int2w(self.checksum())
 
+
+    def get_data(self):
+        """ Preferred way to access appVar data.
+        :rtype: bytes """
+        return self.data
 
     def add(self, variable):
         """ Add a new variable to the appVar.
@@ -73,18 +100,29 @@ class AppVar:
 
 
 class Variable:
+    """ Variable can be a program, appvar, window settings etc. 
+    
+    Attributes:
+        TYPE_ID_PROGRAM
+        TYPE_ID_APPVAR"""
     _VAR_START = b'\x0D\x00'
     _VAR_VERSION = b'\x00'
     _NAME_LENGTH = 8
 
     TYPE_ID_PROGRAM = 0x05
     TYPE_ID_APPVAR = 0x15
+    #TODO You can add more type IDs here
 
-    def __init__(self, name, type_id=None, data=b'', archived=False): #TODO 0x15 is a magic number for appvar variable type
+    def __init__(self, name = None, type_id=None, data=b'', archived=False):
         """ Create a new variable.
         :param name: Name of max 8 characters. Longer names will be truncated without warning.
+        :param type_id: Type of variable e.g. Variable.TYPE_ID_PROGRAM
+        :param data: Variable data field contents
+        :param archived: Set true if variable should be archived.
         :type name: bytes
+        :type type_id: int
         :type data: bytes
+        :type archived: bool
         """
         if not isinstance(name, bytes):
             raise TypeError("Parameter name must be of type bytes")
@@ -98,6 +136,9 @@ class Variable:
         if not isinstance(archived, bool):
             raise TypeError("Parameter archived must be of type bool")
 
+        trimmed_name = trim_zeroes(name)
+        if not trimmed_name.isalpha() or not trimmed_name.isupper(): #TODO also allow digits
+            raise ValueError("Variable names can only contain uppercase letters.")
 
         self.name = bytes_pad(name, self._NAME_LENGTH)
         self.data = data
@@ -114,6 +155,7 @@ class Variable:
 
         self.var_version = self._VAR_VERSION
 
+
     def get_type(self):
         """ Get the variable type as a human readable string.
         :rtype: str """
@@ -124,11 +166,26 @@ class Variable:
         else:
             return "Unknown Type " + hex(self._type_id)
 
+
+    def get_data(self):
+        """ Preferred way to access variable data.
+        :rtype: bytes"""
+        return self.data
+    
+
+    def get_name(self):
+        """ Preferred way to access the variable name.
+        :return: Max 8 character variable name
+        :rtype: str """
+        return trim_zeroes(self.name).decode('ascii')#TODO ti83f uses different character set
+
+
     def is_program(self):
         """ Check if the variable is a program.
         :return: True if the variable is a program.
         :rtype: bool"""
         return self._type_id == self.TYPE_ID_PROGRAM
+
 
     def is_archived(self):
         """ Check if the variable is archived.
@@ -150,7 +207,12 @@ class Variable:
 
         return header + self.data
 
+
 def variable_from_bytes(raw):
+    """ Extract variable from bytes
+    :param raw: Bytes to convert
+    :return: Remaining bytes from raw
+    :rtype: bytes """
     var_start = raw[:2]
     if var_start != Variable._VAR_START:
         raise ValueError("Invalid variable start sequence. Expected " + \
@@ -164,6 +226,7 @@ def variable_from_bytes(raw):
     raw = raw[1:]
 
     name = raw[:Variable._NAME_LENGTH]
+
     raw = raw[Variable._NAME_LENGTH:]
 
     var_version = raw[:1]
@@ -196,8 +259,10 @@ def variable_from_bytes(raw):
 
     return raw, var
 
+
 def variables_from_bytes(raw):
     """ Extract variables from bytes
+    :param raw: Bytes to convert
     :type raw: bytes
     :return: list of Variable objects
     :rtype: list """
@@ -206,6 +271,7 @@ def variables_from_bytes(raw):
         raw, var = variable_from_bytes(raw)
         variables.append(var)
     return variables
+
 
 def appvar_from_bytes(raw):
     """ Extract appVar from bytes """
