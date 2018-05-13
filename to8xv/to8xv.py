@@ -1,5 +1,5 @@
-"""	to8xv: Convert any file to appVar
-	(Python version) """
+""" to8xv: Convert any file to appVar
+    (Python version) """
 
 def main():
     import argparse
