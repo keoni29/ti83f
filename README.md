@@ -56,7 +56,7 @@ for variable in variables:
 Program output
 > Found 1 variable(s)  
 >\> AppVar MYVAR  
-&nbsp;&nbsp;&nbsp;&nbsp;Variable data = b'Hello World!'
+>         Variable data = b'Hello World!'
 
 ## Other useful packages
 **dt8xp** Detokenize 8xp program files for ti8x calculators. https://bitbucket.org/keoni29/dt8xp/
