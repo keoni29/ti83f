@@ -1,0 +1,62 @@
+# Python TI83F file handling
+This is a python package for working with TI83F files. You can use this module to construct and deconstruct TI83F files.
+
+## Installing
+```
+git clone https://bitbucket.org/keoni29/ti83f
+cd ti83f
+pip install .
+```
+You may need to run pip as super user or with sudo.
+
+## Basic usage
+Here are some examples to get you started.
+
+### Construct appvar
+Using the **ti83f** module you can construct a TI83F file like this
+```
+import ti83f
+
+variable_name = b'MYVAR'
+variable_data = b'Hello World!'
+variable = ti83f.Variable(name=variable_name, 
+                          data=variable_data)
+appvar = ti83f.AppVar()
+appvar.add(variable)
+
+raw_data = bytes(appvar)
+
+open('SPAM.8xv', 'wb').write(raw_data)
+```
+
+Hexdump of SPAM.8xv
+>0000000   *   *   T   I   8   3   F   * 032  \n  \0   A   p   p   V   a  
+0000010   r   i   a   b   l   e       f   i   l   e  \0  \0  \0  \0  \0  
+0000020  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  
+0000030  \0  \0  \0  \0  \0 037  \0  \r  \0 016  \0 025   M   Y   V   A  
+0000040   R  \0  \0  \0  \0  \0 016  \0  \f  \0   H   e   l   l   o  
+0000050   W   o   r   l   d   ! 026 006  
+0000058
+
+### Deconstruct appvar
+You can also deconstruct a TI83F file and extract the variable names and data from it like this
+```
+import ti83f
+
+variables = ti83f.variables_from_file('SPAM.8xv')
+
+print("Found", len(variables), "variable(s)")
+
+for variable in variables:
+    print('>', variable.get_type(), variable.get_name())
+    data = variable.get_data()
+    print("\tVariable data =", data)
+```
+
+Program output
+> Found 1 variable(s)  
+>\> AppVar MYVAR  
+&nbsp;&nbsp;&nbsp;&nbsp;Variable data = b'Hello World!'
+
+## Other useful packages
+**dt8xp** Detokenize 8xp program files for ti8x calculators. https://bitbucket.org/keoni29/dt8xp/

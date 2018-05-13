@@ -18,6 +18,7 @@ def main():
                         help="Place variable in RAM instead of Archive")
 
     parser.add_argument('-o', dest='output', help="Output file name")
+    #TODO add variable type_id option
     args = parser.parse_args()
 
     fname_src = args.filename
@@ -26,16 +27,19 @@ def main():
     else:
         fname_dst = os.path.splitext(fname_src)[0] + '.8xv'
 
-    appv = ti83f.AppVar()
     varname = bytes(args.varname, 'ascii')
-    variable = ti83f.Variable(varname, 
-                                    archived=args.archived)
 
     with open(fname_src, 'rb') as src:
-        with open(fname_dst, 'wb') as dst:
-            variable.data = src.read()
-            appv.add(variable)
-            dst.write(bytes(appv))
+        data = src.read()
+    
+    variable = ti83f.Variable(varname, 
+                              data=data
+                              archived=args.archived)
+    appv = ti83f.AppVar()
+    appv.add(variable)
+    
+    with open(fname_dst, 'wb') as dst:
+        dst.write(bytes(appv))
 
 if __name__ == '__main__':
     main()

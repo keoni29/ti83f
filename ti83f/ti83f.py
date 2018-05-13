@@ -1,9 +1,8 @@
-""" Library for encoding and decoding TI83F files
+""" Library for working with TI83F files
 usage:
     1) Decode TI83F files
-        a) Decode appvar from bytes
-        b) Get appvar data
-        c) Decode variables from bytes
+        a) Get variables from file
+
     2) Encode TI83F files
         a) Create appvar
         b) Add variables
@@ -303,7 +302,7 @@ def appvar_from_bytes(raw):
 
 
 def variables_from_file(filename):
-    """ Get variables from an appvar file """
+    """ Get variables from a TI83F file"""
     with open(filename, 'rb') as fd:
         raw = fd.read()
 
