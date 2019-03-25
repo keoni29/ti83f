@@ -77,4 +77,4 @@ Program output
 >         Variable data = b'Hello World!'
 
 ## Other useful packages
-**dt8xp** Detokenize 8xp program files for ti8x calculators. https://bitbucket.org/keoni29/dt8xp/
+**dt8xp** Detokenize 8xp program files for ti8x calculators. https://github.com/keoni29/dt8xp
